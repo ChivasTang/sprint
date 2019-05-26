@@ -1,1 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="msapplication-tap-highlight" content="no">
+<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>sprint | ダウンロードモニター</title>
+<link type="text/css" rel="stylesheet" href="/static/css/lib/kendo.common.min.css" media="all"/>
+<link type="text/css" rel="stylesheet" href="/static/css/lib/kendo.common.min.css" media="all"/>
+<link type="text/css" rel="stylesheet" href="/static/css/lib/kendo.rtl.min.css" media="all"/>
+<link type="text/css" rel="stylesheet" href="/static/css/lib/kendo.silver.min.css" media="all"/>
+<link type="text/css" rel="stylesheet" href="/static/css/lib/kendo.mobile.all.min.css" media="all"/>
+<link type="text/css" rel="stylesheet" href="/static/css/common.css" media="all"/>
+<script type="text/javascript" src="/static/js/lib/jquery.min.js" charset="UTF-8"></script>
+<script type="text/javascript" src="/static/js/lib/jszip.min.js" charset="UTF-8"></script>
+<script type="text/javascript" src="/static/js/lib/kendo.all.min.js" charset="UTF-8"></script>
 <script type="text/javascript" src="/static/js/dl-moni.js" charset="UTF-8"></script>
+<link rel="icon" type="image/x-icon" href="/static/image/favicon.png"/>
+</head>
+<body>
+<form id="form" name="form">
+    <input id="filePath" name="filePath" type="hidden" value=""/>
+    <input id="fileSize" name="fileSize" type="hidden" value=""/>
+    <label for="fileName" class="k-item">ファイル名：<input id="fileName" name="fileName" type="text" disabled="disabled" value=""></label>
+    <label for="fileSizeStr" class="k-item">ファイル名：<input id="fileSizeStr" name="fileSizeStr" type="text" disabled="disabled" value=""></label>
+    <div id="progressbar"></div>
+    <div class="responsive-message"></div>
+</form>
+</body>
+</html>
