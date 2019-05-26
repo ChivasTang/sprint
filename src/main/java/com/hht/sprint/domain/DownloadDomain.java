@@ -13,4 +13,6 @@ public class DownloadDomain {
     private String fileName;
     private Long fileSize;
     private Long dlTime;
+    private String fileSizeStr;
+    private boolean completed;
 }
