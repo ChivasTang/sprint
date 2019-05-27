@@ -1,74 +1,76 @@
-$.ajaxSetup({cache: false});
+function deleteCookie(name) {
+    var ex = new Date();
+    ex.setTime(ex.getTime() - 1);
+    document.cookie = name + "=;expires=" + ex.toGMTString();
+}
 
-var dlMoniLoader = (function () {
-    var setFun = {
-        getDLForm: function(){
-            var url=decodeURI(document.URL);
-            var num=url.indexOf("?");
-            return JSON.parse(url.substr(num + 1));
-        },
+deleteCookie("downloadToken");
+console.log(document.cookie);
 
-        getDLProgress: function(data){
-            var startTime, endTime;
-            $("#filePath").val(data.filePath);
-            $("#fileName").val(data.fileName);
-            $("#fileSize").val(data.fileSize);
-            $("#fileSizeStr").val(data.fileSizeStr);
+document.cookie = "downloadToken=downloadToken";
+console.log(document.cookie);
 
-            $("#progressbar").kendoProgressBar({
-                min:0,
-                max:100,
-                type: "percent",
-                complete:function (e) {
-                    endTime=new Date().getTime();
-                    $.ajax({
-                        url:"afterDL",
-                        type:"POST",
-                        dataType:"json",
-                        contentType:"application/json;charset=UTF-8",
-                        data:JSON.stringify({filePath: data.filePath, fileName: data.fileName, fileSize: data.fileSize, dlTime: (endTime-startTime)})
-                    }).done(function (data, status, xhr) {
-                        if(data.completed){
-                            window.close();
-                        }
-                    });
-                }
-            });
+var filePath = window.opener.document.form.filePath.value;
+var fileName = window.opener.document.form.fileName.value;
+var fileSize = window.opener.document.form.fileSize.value;
+var fileSizeStr = window.opener.document.form.fileSizeStr.value;
 
-            var formData=new FormData();
-            formData.append("filePath",data.filePath);
-            formData.append("fileName",data.fileName);
-            formData.append("fileSize",data.fileSize);
-            formData.append("fileSizeStr",data.fileSizeStr);
+console.log(filePath);
+console.log(fileName);
+console.log(fileSize);
+console.log(fileSizeStr);
 
-            var xhr=new XMLHttpRequest();
-            xhr.open("POST", "realDL");
-            xhr.responseType = 'blob';
-            xhr.onloadstart=function (ev) {
-                startTime=new Date().getTime();
-            };
-            xhr.onprogress=function (ev) {
-                $("#progressbar").data("kendoProgressBar").value(kendo.format("{0}",ev.loaded*100/ev.total));
-            };
-            xhr.onload=function(ev){
-                var blob=this.response;
-                kendo.saveAs({
-                    dataURI:blob,
-                    fileName:data.fileName
-                });
-            };
-            xhr.send(formData);
-        },
+var formData = new FormData();
+formData.append("filePath", filePath);
+formData.append("fileName", fileName);
+formData.append("fileSize", fileSize);
+formData.append("fileSizeStr", fileSizeStr);
 
-        pageReady: function () {
-            setFun.getDLProgress(setFun.getDLForm());
-        }
+var xhr = new XMLHttpRequest();
+var startTime, endTime, dlTime;
+
+xhr.open("POST", "realDL", true);
+xhr.responseType = 'blob';
+xhr.timeout = 3000;
+
+xhr.onloadstart = function (ev) {
+    console.log(ev);
+    startTime = new Date();
+    console.log("onloadstart: " + startTime);
+};
+
+xhr.onloadend = function (ev) {
+    console.log(ev);
+    endTime = new Date();
+    console.log("onloadend: " + endTime);
+
+    dlTime = endTime.getTime() - startTime.getTime();
+    console.log("Download Time: " + dlTime);
+    console.log(document.cookie);
+};
+
+xhr.onload = function (ev) {
+    console.log("onloading...");
+    console.log(ev);
+    var data = {
+        dataURI: ev.target.response,
+        fileName: getFileName()
     };
-    return {
-        setFun: setFun
-    };
-})();
+    saveAs(data);
+};
 
-$(function () {
-    dlMoniLoader.setFun.pageReady();
-});
+xhr.send(formData);
+
+function saveAs(data) {
+    var a = document.createElement('a');
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.href = window.URL.createObjectURL(data.dataURI);
+    a.download = data.fileName;
+    document.body.appendChild(a);
+    a.click();
+}
+
+function getFileName() {
+    return new Date().toLocaleString().replace(/\/|[\u4e00-\u9fa5]|:|\s+/g, "") + ".zip";
+}
