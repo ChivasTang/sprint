@@ -92,15 +92,9 @@ public class DownloadController {
                 servletOutputStream.write(arBytes, 0, (int) count);
             }
 
-            Cookie resultCookie = new Cookie(COOKIE_DOWNLOAD_SUCCESS_TOKEN_NAME, COOKIE_DOWNLOAD_TOKEN_NAME);
-            resultCookie.setMaxAge(-1);
-            resultCookie.setDomain(request.getServerName());
-            resultCookie.setPath(request.getContextPath());
-            response.addCookie(resultCookie);
-
+            servletOutputStream.flush();
             logger.info("ダウンロード処理　-End!-");
 
-            servletOutputStream.flush();
         } catch (IOException e) {
             logger.error("ダウンロード処理　-Error!-");
             logger.error(e.getMessage());
@@ -110,14 +104,17 @@ public class DownloadController {
             fileInputStream.close();
             logger.info("ダウンロード処理　-Finished!-");
         }
-
     }
 
     @PostMapping("afterDL")
     @ResponseBody
-    public DownloadDomain afterDL(@RequestBody DownloadDomain dd, HttpServletRequest request, HttpServletResponse response, Model model) throws IOException {
+    public DownloadDomain afterDL(@ModelAttribute DownloadDomain dd, HttpServletRequest request, HttpServletResponse response, Model model) {
         logger.info("ダウンロード後処理　-Start!-");
-        dd.setCompleted(true);
+        for (Cookie cookie : request.getCookies()) {
+            if (cookie.getName().equals(COOKIE_DOWNLOAD_SUCCESS_TOKEN_NAME)) {
+                dd.setCompleted(true);
+            }
+        }
         logger.info(dd.toString());
         logger.info("ダウンロード後処理　-End!-");
         return dd;

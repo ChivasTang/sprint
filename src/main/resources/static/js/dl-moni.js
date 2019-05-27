@@ -1,13 +1,10 @@
-function deleteCookie(name) {
-    var ex = new Date();
-    ex.setTime(ex.getTime() - 1);
-    document.cookie = name + "=;expires=" + ex.toGMTString();
-}
+var COOKIE_DOWNLOAD_TOKEN = "downloadToken=downloadToken";
+var COOKIE_DOWNLOAD_SUCCESS_TOKEN = "downloadSuccessToken=downloadToken";
 
 deleteCookie("downloadToken");
 console.log(document.cookie);
 
-document.cookie = "downloadToken=downloadToken";
+document.cookie = COOKIE_DOWNLOAD_TOKEN;
 console.log(document.cookie);
 
 var filePath = window.opener.document.form.filePath.value;
@@ -46,7 +43,14 @@ xhr.onloadend = function (ev) {
 
     dlTime = endTime.getTime() - startTime.getTime();
     console.log("Download Time: " + dlTime);
+    document.cookie = COOKIE_DOWNLOAD_SUCCESS_TOKEN;
     console.log(document.cookie);
+
+    formData.append("startTime", startTime.getTime());
+    formData.append("endTime", endTime.getTime());
+    formData.append("dlTime", dlTime);
+    afterDL(formData);
+
 };
 
 xhr.onload = function (ev) {
@@ -61,6 +65,12 @@ xhr.onload = function (ev) {
 
 xhr.send(formData);
 
+function deleteCookie(name) {
+    var ex = new Date();
+    ex.setTime(ex.getTime() - 1);
+    document.cookie = name + "=;expires=" + ex.toGMTString();
+}
+
 function saveAs(data) {
     var a = document.createElement('a');
     a.style.display = 'none';
@@ -73,4 +83,19 @@ function saveAs(data) {
 
 function getFileName() {
     return new Date().toLocaleString().replace(/\/|[\u4e00-\u9fa5]|:|\s+/g, "") + ".zip";
+}
+
+function afterDL(formData) {
+    var xhr=new XMLHttpRequest();
+    xhr.open("POST", "afterDL", true);
+    xhr.onloadend=function (ev) {
+        console.log("afterDL...");
+        console.log(ev);
+        var data=JSON.parse(ev.target.response);
+        if(data.completed){
+            setTimeout("window.close()",3000);
+        }
+    };
+    xhr.send(formData);
+
 }

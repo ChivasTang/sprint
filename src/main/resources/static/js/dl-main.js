@@ -34,7 +34,7 @@ var dlMainLoader = (function () {
 
         getNewWin: function (data) {
             //var link=JSON.stringify({filePath:data.filePath,fileName:data.fileName,fileSize:data.fileSize,fileSizeStr:data.fileSizeStr});
-            var winLink="dlMoni?";
+            var winLink="dlMoni";
             //var link = "dlMoni?" + encodeURI("filePath=" + data.filePath + "&fileName=" + data.fileName + "&fileSize=" + data.fileSize + "&fileSizeStr=" + data.fileSizeStr);
             var target = "_blank";
             var height = 400;
