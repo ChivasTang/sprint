@@ -3,6 +3,7 @@ package com.hht.sprint.web.controller;
 import com.hht.sprint.domain.DownloadDomain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +24,7 @@ public class DownloadController {
 
     private static final String COOKIE_DOWNLOAD_TOKEN_NAME = "downloadToken";
     private static final String COOKIE_DOWNLOAD_SUCCESS_TOKEN_NAME = "downloadSuccessToken";
+    private static final String COOKIE_LOCAL_SAVED_TOKEN_NAME = "localSavedToken";
 
     @GetMapping("/dlMain")
     public ModelAndView dlMain(HttpServletRequest request, HttpServletResponse response, Model model) {
@@ -38,7 +40,7 @@ public class DownloadController {
     @ResponseBody
     public DownloadDomain beforeDL(@RequestBody DownloadDomain dd, HttpServletRequest request, HttpServletResponse response, Model model) {
         logger.info("ダウンロード前処理　-Start!-");
-        String filePath = "/Users/tsk/Desktop/IdeaProjects/sprint/src/main/resources/file/";
+        String filePath = "E:\\dev\\";
         String fileName = "sample.zip";
         dd.setFilePath(filePath);
         dd.setFileName(fileName);
@@ -50,33 +52,31 @@ public class DownloadController {
         return dd;
     }
 
-    @PostMapping(value = "realDL")
+    @GetMapping(value = "realDL")
     public void readDL(
-            @ModelAttribute DownloadDomain dd,
-//            @RequestParam("filePath") String filePath, @RequestParam("fileName") String fileName, @RequestParam("fileSize") Long fileSize,
+//            @ModelAttribute DownloadDomain dd,
+            @RequestParam("filePath") String filePath, @RequestParam("fileName") String fileName, @RequestParam("fileSize") Long fileSize,
             HttpServletRequest request, HttpServletResponse response, Model model) throws IOException {
         logger.info("ダウンロード処理　-Start!-");
-        String filePath = dd.getFilePath();
-        String fileName = dd.getFileName();
-        Long fileSize = dd.getFileSize();
+//        String filePath = dd.getFilePath();
+//        String fileName = dd.getFileName();
+//        Long fileSize = dd.getFileSize();
         File file = new File(filePath + fileName);
         if (!fileSize.equals(file.length())) {
             logger.error("ファイルは、存在しません。");
         }
 
-        String downloadToken = "";
-        for (Cookie cookie : request.getCookies()) {
-            if (cookie.getName().equals(COOKIE_DOWNLOAD_TOKEN_NAME)) {
-                downloadToken = cookie.getValue();
+        String downloadToken="";
+        for(Cookie cookie:request.getCookies()){
+            if(COOKIE_DOWNLOAD_TOKEN_NAME.equals(cookie.getValue())){
+                downloadToken=cookie.getName();
             }
         }
 
-        logger.info(COOKIE_DOWNLOAD_TOKEN_NAME + ": " + downloadToken);
-
         response.setCharacterEncoding("utf-8");
         response.setContentLength((int) file.length());
-        response.setContentType("application/zip");
-//        response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+//        response.setContentType("application/zip");
+        response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
         response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8"));
 
         ServletOutputStream servletOutputStream = null;
@@ -88,6 +88,11 @@ public class DownloadController {
 
             byte[] arBytes = new byte[2048];
 
+            Cookie cookie=new Cookie(downloadToken, COOKIE_DOWNLOAD_SUCCESS_TOKEN_NAME);
+            cookie.setDomain("192.168.3.3");
+            cookie.setPath("/sprint");
+            cookie.setMaxAge(-1);
+            response.addCookie(cookie);
             while ((count = (long) fileInputStream.read(arBytes)) > 0) {
                 servletOutputStream.write(arBytes, 0, (int) count);
             }

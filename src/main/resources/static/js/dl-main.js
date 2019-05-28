@@ -2,6 +2,11 @@ $.ajaxSetup({cache: false});
 
 var dlMainLoader = (function () {
     var setFun = {
+        //cookie
+        downloadToken:"downloadToken",
+        downloadSuccessToken:"downloadSuccessToken",
+        localSavedToken:"localSavedToken",
+
         getDailog: function (data) {
             $("#dialog").kendoDialog({
                 width: 400,
@@ -34,8 +39,9 @@ var dlMainLoader = (function () {
 
         getNewWin: function (data) {
             //var link=JSON.stringify({filePath:data.filePath,fileName:data.fileName,fileSize:data.fileSize,fileSizeStr:data.fileSizeStr});
-            var winLink="dlMoni";
-            //var link = "dlMoni?" + encodeURI("filePath=" + data.filePath + "&fileName=" + data.fileName + "&fileSize=" + data.fileSize + "&fileSizeStr=" + data.fileSizeStr);
+           // var winLink="realDL";
+            var winLink = encodeURI("realDL?" + "filePath=" + data.filePath + "&fileName=" + data.fileName + "&fileSize=" + data.fileSize);
+            console.log(winLink);
             var target = "_blank";
             var height = 400;
             var width = 500;
@@ -46,7 +52,11 @@ var dlMainLoader = (function () {
                 ", left=" + left +
                 ", height=" + height +
                 ", width=" + width;
-            window.open(winLink, target, features, true);
+            var guid=kendo.guid();
+            console.log(guid);
+            document.cookie=guid + "="+ setFun.downloadToken;
+            console.log(document.cookie);
+            window.open("", target, features, false).location.href = winLink;
         },
 
 
